@@ -17,6 +17,13 @@ typedef struct {
   int w_maze;
 } Table; 
 
+// 0┌─── j
+//  │i     x->[i][j]
+typedef struct {
+  int i; 
+  int j; 
+} Coordinate;
+
 int find_list (int* list, int len, int x) {
   // 从整形数组中寻找整数x, 返回下标
   for (int i=0; i<len; i++) {
@@ -65,6 +72,44 @@ void maze_destroy (Table* table) {
   }
   free(table->rows);
   free(table);
+}
+
+Coordinate* coordinate_move (Coordinate* coordinate, enum DIRECTION dir) {
+  // 给定坐标和方向，可以返回下一坐标
+  // todo: 可以在这里内置合法性判断，只返回合法坐标或者NULL指针
+  Coordinate* next_coordinate = malloc(sizeof(Coordinate));
+  next_coordinate->i = coordinate->i;
+  next_coordinate->j = coordinate->j;
+  switch (dir) {
+    case w_dir: 
+      next_coordinate->i --;
+      break;
+    case a_dir:
+      next_coordinate->j--;
+      break;
+    case s_dir:
+      next_coordinate->i++;
+      break;
+    case d_dir:
+      next_coordinate->j++;
+      break;
+  }
+  return next_coordinate;
+}
+
+void Random_DFS_explore (Table* table, Coordinate* coordinate) {
+  Cell* cell = table->rows[coordinate->i][coordinate->j];
+  enum DIRECTION dir = cell->next[cell->next_num];
+  Coordinate* next_coordinate = coordinate_move (coordinate, dir);
+  // todo: 这里还没有判断合法性
+  Random_DFS_explore (table, next_coordinate);
+  free(next_coordinate);
+  cell->next_num ++;
+}
+
+void maze_realize (Table* table, Coordinate* kernel) {
+  // 从kernel这个坐标开始生长迷宫
+  // todo: 完成迷宫生成(随机深度优先算法, Ramdom DFS)
 }
 
 int main () {
