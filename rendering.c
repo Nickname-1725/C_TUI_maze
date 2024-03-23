@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <ncurses.h>
+#include <locale.h>
 #include "maze_gen.h"
 
 char* cross_list[] = {"  ", "╙ ", "═ ", "╝ ",
@@ -33,28 +35,31 @@ char* maze_string (Table* table) {
 
 int main () {
   srandom(time(NULL));
+
+  int y, x;
+  int ch;
+
+  /* initialize curses */
+  setlocale(LC_ALL, "");
+  initscr();
+  cbreak();
+  noecho();
+  keypad(stdscr, true); // 读取小键盘和功能键
+
+  /* 迷宫的准备工作 */
   Table* table = maze_table_gen (9, 9);
   Coordinate kernel = {0,1};
   maze_realize (table, &kernel);
 
   char* str = maze_string (table);
-  printf ("%s", str);
+  printw ("%s", str);
+
+  getch();
+
+  // 善后工作
+  endwin();
   maze_destroy(table);
   free(str);
+  exit(0);
 }
 
-/*
-int main () {
-  srandom(time(NULL));
-  // Cell *cell = calloc (1, sizeof (cell));
-  Table* table = maze_table_gen (99, 99);
-  Coordinate kernel = {0,1};
-  maze_realize (table, &kernel);
-
-  printf("cell[2][1]的下n个: %d, %d, %d, %d; 往下%d个点. \n", table->rows[2][1]->next[0],
-      table->rows[2][1]->next[1],table->rows[2][1]->next[2],table->rows[2][1]->next[3], 
-      table->rows[2][1]->next_num);
-  maze_destroy(table);
-  return 0;
-}
-*/
