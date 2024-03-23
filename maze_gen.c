@@ -137,17 +137,4 @@ Coordinate* coordinate_way (Table* table, Coordinate* coordinate, enum DIRECTION
   return NULL;
 }
 
-int main () {
-  srandom(time(NULL));
-  // Cell *cell = calloc (1, sizeof (cell));
-  Table* table = maze_table_gen (99, 99);
-  Coordinate kernel = {0,1};
-  maze_realize (table, &kernel);
-
-  printf("cell[2][1]的下n个: %d, %d, %d, %d; 往下%d个点. \n", table->rows[2][1]->next[0],
-      table->rows[2][1]->next[1],table->rows[2][1]->next[2],table->rows[2][1]->next[3], 
-      table->rows[2][1]->next_num);
-  maze_destroy(table);
-  return 0;
-}
 
