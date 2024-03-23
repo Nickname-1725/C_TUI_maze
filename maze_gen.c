@@ -3,7 +3,7 @@
 //#include <stdbool.h>
 #include <time.h> // 随机数种子
 
-enum DIRECTION {w_dir, a_dir, s_dir, d_dir};
+enum DIRECTION {none_dir, w_dir, a_dir, s_dir, d_dir};
 typedef struct {
   enum DIRECTION pre;
   enum DIRECTION next[4];
@@ -74,51 +74,87 @@ void maze_destroy (Table* table) {
   free(table);
 }
 
-Coordinate* coordinate_move (Coordinate* coordinate, enum DIRECTION dir) {
+Coordinate* coordinate_move (Table* table, Coordinate* coordinate, enum DIRECTION dir) {
   // 给定坐标和方向，可以返回下一坐标
-  // todo: 可以在这里内置合法性判断，只返回合法坐标或者NULL指针
-  Coordinate* next_coordinate = malloc(sizeof(Coordinate));
-  next_coordinate->i = coordinate->i;
-  next_coordinate->j = coordinate->j;
+  // 内置合法性判断，只返回合法坐标或者NULL指针
+  int i = coordinate->i;
+  int j = coordinate->j;
   switch (dir) {
     case w_dir: 
-      next_coordinate->i --;
+      i --;
       break;
     case a_dir:
-      next_coordinate->j--;
+      j --;
       break;
     case s_dir:
-      next_coordinate->i++;
+      i ++;
       break;
     case d_dir:
-      next_coordinate->j++;
+      j ++;
       break;
   }
+  if ((i < 0 || i > (table->h_maze-1)) || 
+      (j < 0 || j > (table->w_maze-1))) {
+    // 越界检查
+    return NULL;
+  }
+  Coordinate* next_coordinate = malloc(sizeof(Coordinate));
+  next_coordinate->i = i;
+  next_coordinate->j = j;
   return next_coordinate;
 }
 
-void Random_DFS_explore (Table* table, Coordinate* coordinate) {
-  Cell* cell = table->rows[coordinate->i][coordinate->j];
-  enum DIRECTION dir = cell->next[cell->next_num];
-  Coordinate* next_coordinate = coordinate_move (coordinate, dir);
-  // todo: 这里还没有判断合法性
-  Random_DFS_explore (table, next_coordinate);
-  free(next_coordinate);
-  cell->next_num ++;
+enum DIRECTION dir_opposite(enum DIRECTION dir) {
+  // 方向取反
+  return ((dir + 2 - 1) % 4) + 1;
+}
+
+void Random_DFS_explore (Table* table, Coordinate* coordinate, enum DIRECTION pre) {
+  // sleep(1);
+  Cell* cell = table->rows [coordinate->i][coordinate->j];
+  if ((cell->pre != none_dir) || (cell->next_num > 0)) {
+    // 此坐标必须未被打开过
+    // printf("被打开过. @@@@@\n");
+    return; 
+  }
+  cell->pre = pre;
+
+  enum DIRECTION dir;
+  Coordinate* next_coordinate = NULL;
+  while (cell->next_num < 4) {
+    dir = cell->next [cell->next_num];
+    next_coordinate = coordinate_move (table, coordinate, dir);
+    cell->next_num ++;
+
+    if (next_coordinate == NULL) {
+      // 判断合法性，清空检测到的无效方向
+      cell->next[cell->next_num - 1] = 0;
+      continue;
+    }
+    // printf("坐标: [%d, %d], 方向: %d, 已有尝试次数: %d; \n",coordinate->i, coordinate->j, dir, cell->next_num);
+    // printf("下一个点: [%d , %d] ----- \n", next_coordinate->i, next_coordinate->j);
+    Random_DFS_explore (table, next_coordinate, dir_opposite(dir));
+
+    free(next_coordinate); // 善后处理
+    next_coordinate = NULL;
+  }
 }
 
 void maze_realize (Table* table, Coordinate* kernel) {
   // 从kernel这个坐标开始生长迷宫
-  // todo: 完成迷宫生成(随机深度优先算法, Ramdom DFS)
+  Random_DFS_explore (table, kernel, none_dir);
 }
 
 int main () {
   srandom(time(NULL));
   // Cell *cell = calloc (1, sizeof (cell));
   Table* table = maze_table_gen (3, 2);
+  Coordinate kernel = {0,1};
+  maze_realize (table, &kernel);
 
-  printf("cell[0][0]的下n个: %d, %d, %d, %d; \n", table->rows[0][0]->next[0],
-      table->rows[0][0]->next[1],table->rows[0][0]->next[2],table->rows[0][0]->next[3]);
+  printf("cell[2][1]的下n个: %d, %d, %d, %d; 往下%d个点. \n", table->rows[2][1]->next[0],
+      table->rows[2][1]->next[1],table->rows[2][1]->next[2],table->rows[2][1]->next[3], 
+      table->rows[2][1]->next_num);
   maze_destroy(table);
   return 0;
 }
