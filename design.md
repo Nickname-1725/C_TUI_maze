@@ -4,8 +4,9 @@ C语言文本迷宫游戏.
 # 依赖结构
 ```
 main.c
-├ maze_gen.c
-├ keys_input.c
+├ maze_gen.c : 迷宫的生成, 移动, 迷宫相关的类型
+├ keys_input.c : 处理用户按键输入
+├ rendering.c : 迷宫的绘制, 界面的绘制, (计时)
 ...
 ```
 
