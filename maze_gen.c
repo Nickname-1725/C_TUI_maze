@@ -2,27 +2,7 @@
 #include <stdio.h>
 //#include <stdbool.h>
 #include <time.h> // 随机数种子
-
-enum DIRECTION {none_dir, w_dir, a_dir, s_dir, d_dir};
-typedef struct {
-  enum DIRECTION pre;
-  enum DIRECTION next[4];
-  int next_num;
-} Cell;
-
-typedef Cell** Row; // Row是一个数组，存放Cell*
-typedef struct {
-  Row* rows;
-  int h_maze;
-  int w_maze;
-} Table; 
-
-// 0┌─── j
-//  │i     x->[i][j]
-typedef struct {
-  int i; 
-  int j; 
-} Coordinate;
+#include "maze_gen.h"
 
 int find_list (int* list, int len, int x) {
   // 从整形数组中寻找整数x, 返回下标
