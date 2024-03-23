@@ -109,13 +109,12 @@ enum DIRECTION dir_opposite(enum DIRECTION dir) {
   return ((dir + 2 - 1) % 4) + 1;
 }
 
-void Random_DFS_explore (Table* table, Coordinate* coordinate, enum DIRECTION pre) {
-  // sleep(1);
+int Random_DFS_explore (Table* table, Coordinate* coordinate, enum DIRECTION pre) {
+  // 随机深度优先算法, 返回0表示正常, -1表示此点已经打开过
   Cell* cell = table->rows [coordinate->i][coordinate->j];
   if ((cell->pre != none_dir) || (cell->next_num > 0)) {
     // 此坐标必须未被打开过
-    // printf("被打开过. @@@@@\n");
-    return; 
+    return -1; 
   }
   cell->pre = pre;
 
@@ -131,13 +130,15 @@ void Random_DFS_explore (Table* table, Coordinate* coordinate, enum DIRECTION pr
       cell->next[cell->next_num - 1] = 0;
       continue;
     }
-    // printf("坐标: [%d, %d], 方向: %d, 已有尝试次数: %d; \n",coordinate->i, coordinate->j, dir, cell->next_num);
-    // printf("下一个点: [%d , %d] ----- \n", next_coordinate->i, next_coordinate->j);
-    Random_DFS_explore (table, next_coordinate, dir_opposite(dir));
+    if (Random_DFS_explore (table, next_coordinate, dir_opposite(dir)) == -1) {
+      // 无法探索下一个点, 清空该方向
+      cell->next[cell->next_num - 1] = 0;
+    }
 
     free(next_coordinate); // 善后处理
     next_coordinate = NULL;
   }
+  return 0;
 }
 
 void maze_realize (Table* table, Coordinate* kernel) {
@@ -145,10 +146,21 @@ void maze_realize (Table* table, Coordinate* kernel) {
   Random_DFS_explore (table, kernel, none_dir);
 }
 
+Coordinate* coordinate_way (Table* table, Coordinate* coordinate, enum DIRECTION dir) {
+  // 判断从coordinate出发，向dir是否通路，以及是否为合法范围
+  Cell* cell = table->rows [coordinate->i][coordinate->j];
+  if ((cell->pre == dir) || (find_list ((int *) cell->next, 4, dir) != -1)) {
+    // 连通且合法
+    Coordinate* next_coordinate = coordinate_move (table, coordinate, dir);
+    return next_coordinate;
+  }
+  return NULL;
+}
+
 int main () {
   srandom(time(NULL));
   // Cell *cell = calloc (1, sizeof (cell));
-  Table* table = maze_table_gen (3, 2);
+  Table* table = maze_table_gen (99, 99);
   Coordinate kernel = {0,1};
   maze_realize (table, &kernel);
 
