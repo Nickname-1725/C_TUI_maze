@@ -14,8 +14,8 @@ const char* cross_list[] = {"  ", "╙ ", "═ ", "╝ ",
                             "╔═", "╠═", "╦═", "╬═"};
 char* maze_string (Table* table) {
   Coordinate coordinate = {0,0};
-  // 行数 x (行首空格x1 + 行末换行x1 + 列数 x 每格字符x2 x Unicode占字节x4) + 休止符x1
-  char* str = malloc(sizeof (char) * (table->h_maze * ( 1 + 1 + table->w_maze * 2 * 4) + 1));
+  // 行数 x (行首空格x1 + 列数 x 每格字符x2 x Unicode占字节x4) + 休止符x1
+  char* str = malloc(sizeof (char) * (table->h_maze * ( 1 + table->w_maze * 2 * 4) + 1));
   strcpy (str, " "); // 行首空格
   for (coordinate.i = 0; coordinate.i < table->h_maze; coordinate.i++) {
     for (coordinate.j = 0; coordinate.j < table->w_maze; coordinate.j++) {
@@ -106,6 +106,18 @@ void coordinate_screen_move (WINDOW* win, Coordinate* coordinate) {
   wrefresh(win);
 }
 
+void timerun_print (WINDOW* win, WINDOW* tim_win, int time_ms) {
+  int y, x;
+  getyx(win, x, y);
+  int cemi_sec = (time_ms % 1000) / 10 ;
+  int sec = (time_ms / 1000) % 60;
+  int min = (time_ms / 1000) / 60;
+  mvwprintw(tim_win, 0, 0, "time: %02d:%02d.%02d", min, sec, cemi_sec);
+  wmove(win, y, x);
+  wrefresh(tim_win);
+  wrefresh(win);
+}
+
 int main () {
   srandom(time(NULL));
 
@@ -133,7 +145,7 @@ int main () {
   char* str = maze_string (table);
   waddstr (playground_win, str); 
 
-  waddstr (timerun_win, "Comming soon. ");
+  //waddstr (timerun_win, "Comming soon. ");
   waddstr (message_win, "Press [any] key to start.");
   waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
 
@@ -141,6 +153,8 @@ int main () {
 
   //Coordinate coordinate = {0,0};
   coordinate_screen_move (gameboard_win, &kernel);
+  timerun_print(gameboard_win, timerun_win,123456);
+  timerun_print(gameboard_win, timerun_win,123456);
 
   getch();
 
