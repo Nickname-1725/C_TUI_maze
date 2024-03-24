@@ -30,7 +30,8 @@ char* maze_string (Table* table) {
       }
       strcat (str, cross_list[cross_index]);
     }
-    strcat (str, "\n "); // 换行 + 空格
+    //strcat (str, "\n "); // 换行 + 空格
+    strcat (str, " "); // 换行 + 空格
   }
   return str;
 }
@@ -58,22 +59,28 @@ int main () {
   Coordinate kernel = {0,1};
   maze_realize (table, &kernel);
 
-  WINDOW* playground_win = newwin(9, 20, 1, 1); // w_maze * 2 + 2 (行首空格, 换行符)
-  WINDOW* timerun_win = newwin(1, 19, 1, 1+20); // todo: 根据迷宫大小自动计算playground_win尺寸, 以及timerun_win的位置; 模块化窗口的初始及更新
-  // box(win, 0, 0);
+  WINDOW* playground_win = newwin(9, 19, 1, 1); // w_maze * 2 + 2 (行首空格, 换行符)
+  WINDOW* timerun_win = newwin(1, 19, 1, 1+19); // todo: 根据迷宫大小自动计算playground_win尺寸, 以及timerun_win的位置; 模块化窗口的初始及更新
+  WINDOW* message_win = newwin(2, 19, 2, 1+19);
+  WINDOW* tips_win = newwin(9-1-2, 19, 4, 1+19);
+  wbkgd(playground_win, COLOR_PAIR(playground_pair));
+  wbkgd(timerun_win, COLOR_PAIR(menu_light_pair));
+  wbkgd(message_win, COLOR_PAIR(menu_dark_pair));
+  wbkgd(tips_win, COLOR_PAIR(menu_light_pair));
 
   char* str = maze_string (table);
-  wattron(playground_win, COLOR_PAIR(playground_pair));
+  //wattron(playground_win, COLOR_PAIR(playground_pair));
   waddstr (playground_win, str); // 曾为wprintw(win, "%s", str);
-  wattroff(playground_win, COLOR_PAIR(playground_pair));
-  //printw ("%s", str);
+  //wattroff(playground_win, COLOR_PAIR(playground_pair));
 
-  wattron(timerun_win, COLOR_PAIR(menu_light_pair));
   waddstr (timerun_win, "Comming soon. ");
-  wattroff(timerun_win, COLOR_PAIR(menu_light_pair));
+  waddstr (message_win, "Press [any] key to start.");
+  waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
 
   wrefresh(playground_win);
   wrefresh(timerun_win);
+  wrefresh(message_win);
+  wrefresh(tips_win);
 
   getch();
 
