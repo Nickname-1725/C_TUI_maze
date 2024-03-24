@@ -68,9 +68,6 @@ void init_gameboard (Table* table, WINDOW** plygrnd_win, WINDOW** timrun_win, WI
 int main () {
   srandom(time(NULL));
 
-  int y, x;
-  int ch;
-
   /* initialize curses */
   setlocale(LC_ALL, "");
   initscr();
