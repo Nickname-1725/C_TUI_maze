@@ -36,6 +36,35 @@ char* maze_string (Table* table) {
   return str;
 }
 
+void coordinate_screen_map (Coordinate* coordinate, int *y, int *x) {
+  *y = coordinate->i;
+  *x = coordinate->j*2 + 1;
+}
+
+void playground_size (Table* table, int *y, int *x) {
+  *y = table->h_maze;
+  *x = table->w_maze*2 + 1;
+}
+
+const side_bar_width = 25;
+void init_gameboard (Table* table, WINDOW** plygrnd_win, WINDOW** timrun_win, WINDOW** msg_win, WINDOW** tips_win) {
+  int plygrnd_size_y;
+  int plygrnd_size_x;
+  playground_size(table, &plygrnd_size_y, &plygrnd_size_x);
+  *plygrnd_win = newwin(plygrnd_size_y, plygrnd_size_x, 
+                       1, 1); // w_maze * 2 + 2 (行首空格, 换行符)
+  *timrun_win = newwin(1, side_bar_width, 
+                       1, 1+plygrnd_size_x); // todo: 根据迷宫大小自动计算playground_win尺寸, 以及timerun_win的位置; 模块化窗口的初始及更新
+  *msg_win = newwin(2, side_bar_width,
+                    2, 1+plygrnd_size_x);
+  *tips_win = newwin(plygrnd_size_y-1-2, side_bar_width, 
+                     4, 1+plygrnd_size_x);
+  wbkgd(*plygrnd_win, COLOR_PAIR(playground_pair));
+  wbkgd(*timrun_win, COLOR_PAIR(menu_light_pair));
+  wbkgd(*msg_win, COLOR_PAIR(menu_dark_pair));
+  wbkgd(*tips_win, COLOR_PAIR(menu_light_pair));
+}
+
 int main () {
   srandom(time(NULL));
 
@@ -55,18 +84,12 @@ int main () {
   init_pair(menu_dark_pair, COLOR_WHITE, COLOR_BLUE);
   refresh(); // 必须refresh(), 否则无法显示非并标准窗口
   /* 迷宫的准备工作 */
-  Table* table = maze_table_gen (9, 9);
+  Table* table = maze_table_gen (20, 20);
   Coordinate kernel = {0,1};
   maze_realize (table, &kernel);
 
-  WINDOW* playground_win = newwin(9, 19, 1, 1); // w_maze * 2 + 2 (行首空格, 换行符)
-  WINDOW* timerun_win = newwin(1, 19, 1, 1+19); // todo: 根据迷宫大小自动计算playground_win尺寸, 以及timerun_win的位置; 模块化窗口的初始及更新
-  WINDOW* message_win = newwin(2, 19, 2, 1+19);
-  WINDOW* tips_win = newwin(9-1-2, 19, 4, 1+19);
-  wbkgd(playground_win, COLOR_PAIR(playground_pair));
-  wbkgd(timerun_win, COLOR_PAIR(menu_light_pair));
-  wbkgd(message_win, COLOR_PAIR(menu_dark_pair));
-  wbkgd(tips_win, COLOR_PAIR(menu_light_pair));
+  WINDOW *playground_win, *timerun_win, *message_win, *tips_win;
+  init_gameboard (table, &playground_win, &timerun_win, &message_win, &tips_win);
 
   char* str = maze_string (table);
   //wattron(playground_win, COLOR_PAIR(playground_pair));
