@@ -7,10 +7,11 @@
 #include <locale.h>
 #include "maze_gen.h"
 
-char* cross_list[] = {"  ", "╙ ", "═ ", "╝ ",
-                      "╓ ", "║ ", "╗ ", "╣ ",
-                      " ═", "╚═", "══", "╩═",
-                      "╔═", "╠═", "╦═", "╬═"};
+enum COLOR_PAIR {playground_pair = 1, menu_light_pair, menu_dark_pair};
+const char* cross_list[] = {"  ", "╙ ", "═ ", "╝ ",
+                            "╓ ", "║ ", "╗ ", "╣ ",
+                            " ═", "╚═", "══", "╩═",
+                            "╔═", "╠═", "╦═", "╬═"};
 char* maze_string (Table* table) {
   Coordinate coordinate = {0,0};
   // 行数 x (行首空格x1 + 行末换行x1 + 列数 x 每格字符x2 x Unicode占字节x4) + 休止符x1
@@ -46,18 +47,22 @@ int main () {
   cbreak();
   noecho();
   keypad(stdscr, true); // 读取小键盘和功能键
+  start_color();
 
+  init_pair(playground_pair, COLOR_BLACK, COLOR_WHITE);
+  refresh(); // 必须refresh(), 否则无法显示非并标准窗口
   /* 迷宫的准备工作 */
   Table* table = maze_table_gen (9, 9);
   Coordinate kernel = {0,1};
   maze_realize (table, &kernel);
 
   WINDOW* win = newwin(9, 20, 1, 1); // w_maze * 2 + 2 (行首空格, 换行符)
-  refresh(); // 必须refresh(), 否则无法显示非并标准窗口
-  box(win, 0, 0);
+  // box(win, 0, 0);
 
   char* str = maze_string (table);
-  wprintw (win, "%s", str);
+  wattron(win, COLOR_PAIR(playground_pair));
+  waddstr (win, str); // 曾为wprintw(win, "%s", str);
+  wattroff(win, COLOR_PAIR(playground_pair));
   //printw ("%s", str);
   wrefresh(win);
 

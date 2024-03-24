@@ -72,6 +72,8 @@ Coordinate* coordinate_move (Table* table, Coordinate* coordinate, enum DIRECTIO
     case d_dir:
       j ++;
       break;
+    case none_dir:
+      break;
   }
   if ((i < 0 || i > (table->h_maze-1)) || 
       (j < 0 || j > (table->w_maze-1))) {
