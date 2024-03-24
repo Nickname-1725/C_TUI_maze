@@ -72,6 +72,38 @@ void init_gameboard (Table* table, WINDOW** gmbrd_win, WINDOW** plygrnd_win, WIN
   wbkgd(*timrun_win, COLOR_PAIR(menu_light_pair));
   wbkgd(*msg_win, COLOR_PAIR(menu_dark_pair));
   wbkgd(*tips_win, COLOR_PAIR(menu_light_pair));
+  //wrefresh(*plygrnd_win);
+  //wrefresh(*timrun_win);
+  //wrefresh(*msg_win);
+  //wrefresh(*tips_win);
+}
+
+/*
+void coordinate_screen_move (WINDOW* win, Coordinate* obsolete, Coordinate* coordinate) {
+  // todo: 解决从屏幕上获取宽字符问题，把玩家位置绘制成涂色标记(或许也可能针对节点重新打印字符串)
+  int y_obsolete, x_obsolete;
+  int y, x;
+  char ch_obsolete, ch;
+  coordinate_screen_map (obsolete, &y_obsolete, &x_obsolete);
+  coordinate_screen_map (coordinate, &y, &x);
+  
+  ch_obsolete = mvwinch(win, y_obsolete, x_obsolete); //&& A_CHARTEXT;
+  ch = mvwinch(win, y, x); //&& A_CHARTEXT;
+  mvwaddch (win, y_obsolete, x_obsolete, ch_obsolete);
+  attron(COLOR_PAIR(2));
+  mvwaddch (win, y, x, ch);
+  attroff(COLOR_PAIR(2));
+  
+  wmove(win, y, x);
+  wrefresh(win);
+}
+*/
+
+void coordinate_screen_move (WINDOW* win, Coordinate* coordinate) {
+  int y, x;
+  coordinate_screen_map (coordinate, &y, &x);
+  wmove(win, y, x);
+  wrefresh(win);
 }
 
 int main () {
@@ -106,6 +138,9 @@ int main () {
   waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
 
   wrefresh(gameboard_win);
+
+  //Coordinate coordinate = {0,0};
+  coordinate_screen_move (gameboard_win, &kernel);
 
   getch();
 
