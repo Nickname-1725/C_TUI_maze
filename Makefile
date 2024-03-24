@@ -3,7 +3,7 @@ build/foo: main.c
 
 build/test: maze_gen.c rendering.c
 	gcc -Wall -o build/test maze_gen.c rendering.c -lncursesw
-build/test: maze_gen.h
+build/test: maze_gen.h rendering.h
 
 clean:
 	rm -f build/*.o

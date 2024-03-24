@@ -5,7 +5,9 @@
 #include <time.h>
 #include <ncurses.h>
 #include <locale.h>
+
 #include "maze_gen.h"
+#include "rendering.h"
 
 enum COLOR_PAIR {playground_pair = 1, menu_light_pair, menu_dark_pair};
 const char* cross_list[] = {"  ", "╙ ", "═ ", "╝ ",
@@ -30,7 +32,6 @@ char* maze_string (Table* table) {
       }
       strcat (str, cross_list[cross_index]);
     }
-    //strcat (str, "\n "); // 换行 + 空格
     strcat (str, " "); // 换行 + 空格
   }
   return str;
@@ -72,10 +73,6 @@ void init_gameboard (Table* table, WINDOW** gmbrd_win, WINDOW** plygrnd_win, WIN
   wbkgd(*timrun_win, COLOR_PAIR(menu_light_pair));
   wbkgd(*msg_win, COLOR_PAIR(menu_dark_pair));
   wbkgd(*tips_win, COLOR_PAIR(menu_light_pair));
-  //wrefresh(*plygrnd_win);
-  //wrefresh(*timrun_win);
-  //wrefresh(*msg_win);
-  //wrefresh(*tips_win);
 }
 
 /*
@@ -118,9 +115,7 @@ void timerun_print (WINDOW* win, WINDOW* tim_win, int time_ms) {
   wrefresh(win);
 }
 
-int main () {
-  srandom(time(NULL));
-
+void init_TUI () {
   /* initialize curses */
   setlocale(LC_ALL, "");
   initscr();
@@ -133,6 +128,12 @@ int main () {
   init_pair(menu_light_pair, COLOR_BLACK, COLOR_CYAN);
   init_pair(menu_dark_pair, COLOR_WHITE, COLOR_BLUE);
   refresh(); // 必须refresh(), 否则无法显示非并标准窗口
+}
+
+int main () {
+  srandom(time(NULL));
+
+  init_TUI();
   /* 迷宫的准备工作 */
   Table* table = maze_table_gen (20, 20);
   Coordinate kernel = {0,1};
@@ -145,13 +146,11 @@ int main () {
   char* str = maze_string (table);
   waddstr (playground_win, str); 
 
-  //waddstr (timerun_win, "Comming soon. ");
   waddstr (message_win, "Press [any] key to start.");
   waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
 
   wrefresh(gameboard_win);
 
-  //Coordinate coordinate = {0,0};
   coordinate_screen_move (gameboard_win, &kernel);
   timerun_print(gameboard_win, timerun_win,123456);
   timerun_print(gameboard_win, timerun_win,123456);
