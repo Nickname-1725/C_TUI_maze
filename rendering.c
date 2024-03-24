@@ -46,19 +46,28 @@ void playground_size (Table* table, int *y, int *x) {
   *x = table->w_maze*2 + 1;
 }
 
-const side_bar_width = 25;
-void init_gameboard (Table* table, WINDOW** plygrnd_win, WINDOW** timrun_win, WINDOW** msg_win, WINDOW** tips_win) {
+const int side_bar_width = 25;
+void init_gameboard (Table* table, WINDOW** gmbrd_win, WINDOW** plygrnd_win, WINDOW** timrun_win, WINDOW** msg_win, WINDOW** tips_win) {
   int plygrnd_size_y;
   int plygrnd_size_x;
   playground_size(table, &plygrnd_size_y, &plygrnd_size_x);
-  *plygrnd_win = newwin(plygrnd_size_y, plygrnd_size_x, 
-                       1, 1); // w_maze * 2 + 2 (行首空格, 换行符)
-  *timrun_win = newwin(1, side_bar_width, 
-                       1, 1+plygrnd_size_x); // todo: 根据迷宫大小自动计算playground_win尺寸, 以及timerun_win的位置; 模块化窗口的初始及更新
-  *msg_win = newwin(2, side_bar_width,
-                    2, 1+plygrnd_size_x);
-  *tips_win = newwin(plygrnd_size_y-1-2, side_bar_width, 
-                     4, 1+plygrnd_size_x);
+  /* 新建居中窗口 */
+  *gmbrd_win = newwin(
+      plygrnd_size_y, plygrnd_size_x + side_bar_width,
+      (LINES - plygrnd_size_y) / 2, (COLS - plygrnd_size_x - side_bar_width) / 2);
+
+  *plygrnd_win = derwin (*gmbrd_win,
+      plygrnd_size_y, plygrnd_size_x, 
+      0, 0); // w_maze * 2 + 2 (行首空格, 换行符)
+  *timrun_win = derwin (*gmbrd_win,
+      1, side_bar_width, 
+      0, plygrnd_size_x); // todo: 根据迷宫大小自动计算playground_win尺寸, 以及timerun_win的位置; 模块化窗口的初始及更新
+  *msg_win = derwin (*gmbrd_win,
+      2, side_bar_width,
+      1, plygrnd_size_x);
+  *tips_win = derwin (*gmbrd_win,
+      plygrnd_size_y-1-2, side_bar_width, 
+      3, plygrnd_size_x);
   wbkgd(*plygrnd_win, COLOR_PAIR(playground_pair));
   wbkgd(*timrun_win, COLOR_PAIR(menu_light_pair));
   wbkgd(*msg_win, COLOR_PAIR(menu_dark_pair));
@@ -85,22 +94,18 @@ int main () {
   Coordinate kernel = {0,1};
   maze_realize (table, &kernel);
 
+  WINDOW* gameboard_win;
   WINDOW *playground_win, *timerun_win, *message_win, *tips_win;
-  init_gameboard (table, &playground_win, &timerun_win, &message_win, &tips_win);
+  init_gameboard (table, &gameboard_win, &playground_win, &timerun_win, &message_win, &tips_win);
 
   char* str = maze_string (table);
-  //wattron(playground_win, COLOR_PAIR(playground_pair));
-  waddstr (playground_win, str); // 曾为wprintw(win, "%s", str);
-  //wattroff(playground_win, COLOR_PAIR(playground_pair));
+  waddstr (playground_win, str); 
 
   waddstr (timerun_win, "Comming soon. ");
   waddstr (message_win, "Press [any] key to start.");
   waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
 
-  wrefresh(playground_win);
-  wrefresh(timerun_win);
-  wrefresh(message_win);
-  wrefresh(tips_win);
+  wrefresh(gameboard_win);
 
   getch();
 
