@@ -35,6 +35,9 @@ void key_input_loop (Table* table, Coordinate* coordinate, WINDOW* win) {
       case 'D' :
         coordinate_temp = coordinate_way (table, coordinate, d_dir);
         break;
+      default : 
+        coordinate_temp = NULL;
+        break;
     }
     if (coordinate_temp != NULL) {
       free(coordinate);
