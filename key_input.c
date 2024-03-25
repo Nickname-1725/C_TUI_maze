@@ -6,13 +6,18 @@
 #include "maze_gen.h"
 #include "rendering.h"
 
-void key_input_loop (Table* table, Coordinate* start, WINDOW* win) {
+enum GAME_STATE {exit_state, default_on_state, customed_on_state};
+
+enum GAME_STATE key_input_loop (Table* table, Coordinate* start, Coordinate* end, WINDOW* win) {
   int ch;
   Coordinate* coordinate = malloc(sizeof(Coordinate));
   *coordinate = *start;
   Coordinate* coordinate_temp = NULL;
   do {
     coordinate_screen_move (win, coordinate);
+    if ((coordinate->i == end->i) && (coordinate->j == end->j)) {
+      return default_on_state;
+    }
 
     ch = getch();
     // 判断输入键
@@ -47,40 +52,64 @@ void key_input_loop (Table* table, Coordinate* start, WINDOW* win) {
     }
   } while ((ch != 'q') && (ch != 'Q'));
   free(coordinate_temp);
+  return exit_state;
 }
 
 int main () {
   srandom(time(NULL));
 
   init_TUI();
-  /* 迷宫的准备工作 */
-  Table* table = maze_table_gen (20, 20);
-  Coordinate kernel = {0,1};
-  maze_realize (table, &kernel);
-
-  /* 游戏板的准备工作 */
-  WINDOW* gameboard_win;
-  WINDOW *playground_win, *timerun_win, *message_win, *tips_win;
-  init_gameboard (table, &gameboard_win, &playground_win, &timerun_win, &message_win, &tips_win);
-
-  char* str = maze_string (table);
-  waddstr (playground_win, str); 
-
-  waddstr (message_win, "Press [any] key to start.");
-  waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
-
-  wrefresh(gameboard_win);
 
   /* 开始互动 */
-  Coordinate start_point = {0, 0};
-  timerun_print(gameboard_win, timerun_win,123456);
-  timerun_print(gameboard_win, timerun_win,123456);
-  key_input_loop(table, &start_point, gameboard_win);
+  enum GAME_STATE state;
+  do {
+    /* 迷宫的准备工作 */
+    Table* table = maze_table_gen (20, 20);
+    Coordinate kernel = {0,1};
+    maze_realize (table, &kernel);
+    
+    Coordinate start_point = {0, 0};
+    Coordinate end_point = {table->h_maze-1, table->w_maze-1};
+    
+    /* 游戏板的准备工作 */
+    WINDOW* gameboard_win;
+    WINDOW *playground_win, *timerun_win, *message_win, *tips_win;
+    init_gameboard (table, &gameboard_win, &playground_win, &timerun_win, &message_win, &tips_win);
+
+    char* str = maze_string (table);
+    waddstr (playground_win, str); 
+    free(str);
+
+    if (state != default_on_state) {
+      waddstr (message_win, "Press [any] key to start.");
+    } else {
+      waddstr (message_win, "You won, another game? ([any] key)");
+    }
+    waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
+    timerun_print(gameboard_win, timerun_win, 0);
+
+    wrefresh(gameboard_win);
+    move(0, 0);
+    refresh();
+
+    /* 开始互动 */
+    int start_ch = getch();
+    if ((start_ch == 'q') || (start_ch == 'Q')) {
+      state = exit_state;
+      break;
+    }
+    mvwaddstr (message_win, 0, 0, "Dash to the right-bottom corner.");
+    wrefresh(message_win);
+
+    timerun_print(gameboard_win, timerun_win,123456);
+    state = key_input_loop(table, &start_point, &end_point, gameboard_win);
+
+    /* 结束 */
+    maze_destroy(table);
+  } while (state != exit_state);
 
   // 善后工作
   endwin();
-  maze_destroy(table);
-  free(str);
   exit(0);
 }
 
