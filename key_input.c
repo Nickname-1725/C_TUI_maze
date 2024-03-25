@@ -6,13 +6,15 @@
 #include "maze_gen.h"
 #include "rendering.h"
 
-void key_input_loop (Table* table, Coordinate* coordinate, WINDOW* win) {
+void key_input_loop (Table* table, Coordinate* start, WINDOW* win) {
   int ch;
+  Coordinate* coordinate = malloc(sizeof(Coordinate));
+  *coordinate = *start;
+  Coordinate* coordinate_temp = NULL;
   do {
     coordinate_screen_move (win, coordinate);
 
     ch = getch();
-    Coordinate* coordinate_temp;
     // 判断输入键
     switch (ch) {
       case KEY_UP: 
@@ -44,6 +46,7 @@ void key_input_loop (Table* table, Coordinate* coordinate, WINDOW* win) {
       coordinate = coordinate_temp;
     }
   } while ((ch != 'q') && (ch != 'Q'));
+  free(coordinate_temp);
 }
 
 int main () {
@@ -69,12 +72,10 @@ int main () {
   wrefresh(gameboard_win);
 
   /* 开始互动 */
-  Coordinate* start_point = malloc(sizeof(Coordinate));
-  start_point->i = 0;
-  start_point->j = 0;
+  Coordinate start_point = {0, 0};
   timerun_print(gameboard_win, timerun_win,123456);
   timerun_print(gameboard_win, timerun_win,123456);
-  key_input_loop(table, start_point, gameboard_win);
+  key_input_loop(table, &start_point, gameboard_win);
 
   // 善后工作
   endwin();
