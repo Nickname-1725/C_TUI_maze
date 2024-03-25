@@ -26,7 +26,26 @@ main.c
 
 # 功能设计
 ## 计时功能
-使用"unistd.h"中的`int usleep(useconds_t usec)`函数, 参考[CSDN文章: Linux中的休眠函数](https://blog.csdn.net/q28292929/article/details/127665877)
+1. 获取时间使用"time.h"库中的`clock_t clock()`函数
+   ```C
+   int main () {
+     clock_t start, end;
+     long time_ms; // 64位平台下, int 4byte, long 8byte.
+     start = clock();
+     // 做某些事情
+     end = clock();
+     time_ms = (end - start) * 1000 / CLOCKS_PER_SEC; 
+   }
+   ```
+2. 使用"unistd.h"中的`int usleep(useconds_t usec)`函数, 参考[CSDN文章: Linux中的休眠函数](https://blog.csdn.net/q28292929/article/details/127665877)
+3. 使用"pthread.h"开一个线程, 使用`pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg)`跟`pthread_cancel(pthread_t thread)`函数
+   ```C
+   pthread_t tid;
+   pthread_create(&tid, NULL, start_routine, NULL);
+   // 做了某事
+   pthread_cancel(start_routine);
+   pthread_join(start_routine, NULL);
+   ```
 
 ## 游戏重置功能
 1. 将要在init_gameboard中判断窗口是否已经存在，若已经存在，则先销毁（以及清空）后新建
