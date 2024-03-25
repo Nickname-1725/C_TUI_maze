@@ -130,37 +130,3 @@ void init_TUI () {
   refresh(); // 必须refresh(), 否则无法显示非并标准窗口
 }
 
-int main () {
-  srandom(time(NULL));
-
-  init_TUI();
-  /* 迷宫的准备工作 */
-  Table* table = maze_table_gen (20, 20);
-  Coordinate kernel = {0,1};
-  maze_realize (table, &kernel);
-
-  WINDOW* gameboard_win;
-  WINDOW *playground_win, *timerun_win, *message_win, *tips_win;
-  init_gameboard (table, &gameboard_win, &playground_win, &timerun_win, &message_win, &tips_win);
-
-  char* str = maze_string (table);
-  waddstr (playground_win, str); 
-
-  waddstr (message_win, "Press [any] key to start.");
-  waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
-
-  wrefresh(gameboard_win);
-
-  coordinate_screen_move (gameboard_win, &kernel);
-  timerun_print(gameboard_win, timerun_win,123456);
-  timerun_print(gameboard_win, timerun_win,123456);
-
-  getch();
-
-  // 善后工作
-  endwin();
-  maze_destroy(table);
-  free(str);
-  exit(0);
-}
-
