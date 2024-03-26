@@ -73,6 +73,8 @@ int main () {
     
     /* 游戏板的准备工作 */
     WINDOW* gameboard_win;
+    WINDOW *playground_win, *timerun_win, *message_win, *tips_win;
+    init_gameboard (table, &gameboard_win, &playground_win, &timerun_win, &message_win, &tips_win);
 
     maze_render(table, playground_win);
     if (state != default_on_state) {
