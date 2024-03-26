@@ -55,13 +55,26 @@ enum GAME_STATE key_input_loop (Table* table, Coordinate* start, Coordinate* end
   return exit_state;
 }
 
+enum GAME_STATE ready_loop () {
+  int ch;
+  do {
+    ch = getch();
+    switch (ch) {
+      case ' ' :
+        return customed_on_state;
+        break;
+    }
+  } while ((ch != 'q') && (ch != 'Q'));
+  return exit_state;
+}
+
 int main () {
   srandom(time(NULL));
 
   init_TUI();
 
   /* 开始互动 */
-  enum GAME_STATE state;
+  enum GAME_STATE state = customed_on_state;
   do {
     /* 迷宫的准备工作 */
     Table* table = maze_table_gen (20, 20);
@@ -78,9 +91,9 @@ int main () {
 
     maze_render(table, playground_win);
     if (state != default_on_state) {
-      message_tips_print (message_win, "Press [any] key to start.");
+      message_tips_print (message_win, "Press [space] key to start.");
     } else {
-      message_tips_print (message_win, "You won, another game? ([any] key)");
+      message_tips_print (message_win, "You won, another game? ([space] key)");
     }
     message_tips_print (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
     timerun_print(gameboard_win, timerun_win, 0);
@@ -88,11 +101,8 @@ int main () {
     cursor_reset();
 
     /* 开始互动 */
-    int start_ch = getch();
-    if ((start_ch == 'q') || (start_ch == 'Q')) {
-      state = exit_state;
-      break;
-    }
+    state = ready_loop(); // 应该控制游戏退出
+    if (state == exit_state) {break;}
     message_tips_print (message_win, "Dash to the right-bottom corner.");
 
     timerun_print(gameboard_win, timerun_win,123456);
