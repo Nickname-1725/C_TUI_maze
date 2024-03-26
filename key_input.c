@@ -72,7 +72,6 @@ enum GAME_STATE ready_loop () {
 void time_run (WINDOW* gameboard_win, WINDOW* timerun_win) {
   struct timespec start, end;
   long ms;
-  //long sec;
   clock_gettime(CLOCK_REALTIME, &start);
 
   while(1) {
@@ -89,7 +88,6 @@ int main () {
 
   init_TUI();
 
-  /* 开始互动 */
   enum GAME_STATE state = customed_on_state;
   do {
     /* 迷宫的准备工作 */
@@ -122,7 +120,6 @@ int main () {
     message_tips_print (message_win, "Dash to the right-bottom corner.");
     time_run(gameboard_win, timerun_win);
 
-    //timerun_print(gameboard_win, timerun_win,123456);
     state = key_input_loop(table, &start_point, &end_point, gameboard_win);
 
     /* 结束 */
