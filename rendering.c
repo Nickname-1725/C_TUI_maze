@@ -111,7 +111,7 @@ void coordinate_screen_move (WINDOW* win, Coordinate* coordinate) {
 
 void timerun_print (WINDOW* win, WINDOW* tim_win, long time_ms) {
   int y, x;
-  getyx(win, x, y);
+  getyx(win, y, x);
   int cemi_sec = time_ms % 1000 / 10 ;
   int min = time_ms / 1000 / 60;
   int sec = time_ms / 1000 % 60;

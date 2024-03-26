@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "maze_gen.h"
 #include "rendering.h"
@@ -69,6 +70,7 @@ enum GAME_STATE ready_loop () {
   return exit_state;
 }
 
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 void time_run (WINDOW* gameboard_win, WINDOW* timerun_win) {
   struct timespec start, end;
   long ms;
@@ -79,8 +81,17 @@ void time_run (WINDOW* gameboard_win, WINDOW* timerun_win) {
     clock_gettime(CLOCK_REALTIME, &end);
     ms = (end.tv_nsec - start.tv_nsec) / 1000000;
     ms += (end.tv_sec - start.tv_sec) * 1000;
+    pthread_mutex_lock(&lock);
     timerun_print(gameboard_win, timerun_win, ms);
+    pthread_mutex_unlock(&lock);
   }
+}
+
+struct time_run_args {WINDOW* gameboard_win; WINDOW* timerun_win;};
+void* time_run_routine (void* args) {
+  struct time_run_args* timrun_args = (struct time_run_args *) args;
+  time_run (timrun_args->gameboard_win, timrun_args->timerun_win);
+  pthread_exit(NULL);
 }
 
 int main () {
@@ -118,9 +129,15 @@ int main () {
     state = ready_loop(); // 应该控制游戏退出
     if (state == exit_state) {break;}
     message_tips_print (message_win, "Dash to the right-bottom corner.");
-    time_run(gameboard_win, timerun_win);
+    //time_run(gameboard_win, timerun_win);
+    pthread_t tid;
+    struct time_run_args args = {gameboard_win, timerun_win};
+    pthread_create(&tid, NULL, time_run_routine, &args);
 
     state = key_input_loop(table, &start_point, &end_point, gameboard_win);
+    pthread_cancel(tid);
+    pthread_join(tid, NULL);
+    pthread_mutex_destroy(&lock);
 
     /* 结束 */
     maze_destroy(table);
