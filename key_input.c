@@ -114,20 +114,26 @@ int main () {
     WINDOW *playground_win, *timerun_win, *message_win, *tips_win;
     init_gameboard (table, &gameboard_win, &playground_win, &timerun_win, &message_win, &tips_win);
 
-    maze_render(table, playground_win);
+    /* 开始互动 */
+    message_tips_print (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
     if (state != default_on_state) {
+      maze_render(table, playground_win);
       message_tips_print (message_win, "Press [space] key to start.");
+      timerun_print(gameboard_win, timerun_win, 0);
+      cursor_reset();
+
+      state = ready_loop(); // 应该控制游戏退出
+      if (state == exit_state) {break;}
     } else {
       message_tips_print (message_win, "You won, another game? ([space] key)");
+
+      state = ready_loop(); // 应该控制游戏退出
+      if (state == exit_state) {break;}
+
+      maze_render(table, playground_win);
+      timerun_print(gameboard_win, timerun_win, 0);
     }
-    message_tips_print (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
-    timerun_print(gameboard_win, timerun_win, 0);
 
-    cursor_reset();
-
-    /* 开始互动 */
-    state = ready_loop(); // 应该控制游戏退出
-    if (state == exit_state) {break;}
     message_tips_print (message_win, "Dash to the right-bottom corner.");
     //time_run(gameboard_win, timerun_win);
     pthread_t tid;
