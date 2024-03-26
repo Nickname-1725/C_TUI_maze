@@ -10,13 +10,16 @@
 
 enum GAME_STATE {exit_state, default_on_state, customed_on_state};
 
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 enum GAME_STATE key_input_loop (Table* table, Coordinate* start, Coordinate* end, WINDOW* win) {
   int ch;
   Coordinate* coordinate = malloc(sizeof(Coordinate));
   *coordinate = *start;
   Coordinate* coordinate_temp = NULL;
   do {
+    pthread_mutex_lock(&lock);
     coordinate_screen_move (win, coordinate);
+    pthread_mutex_unlock(&lock);
     if ((coordinate->i == end->i) && (coordinate->j == end->j)) {
       return default_on_state;
     }
@@ -70,7 +73,6 @@ enum GAME_STATE ready_loop () {
   return exit_state;
 }
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 void time_run (WINDOW* gameboard_win, WINDOW* timerun_win) {
   struct timespec start, end;
   long ms;
@@ -143,7 +145,6 @@ int main () {
     state = key_input_loop(table, &start_point, &end_point, gameboard_win);
     pthread_cancel(tid);
     pthread_join(tid, NULL);
-    pthread_mutex_destroy(&lock);
 
     /* 结束 */
     maze_destroy(table);
@@ -151,6 +152,7 @@ int main () {
 
   // 善后工作
   endwin();
+  pthread_mutex_destroy(&lock);
   exit(0);
 }
 
