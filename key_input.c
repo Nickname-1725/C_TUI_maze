@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "maze_gen.h"
 #include "rendering.h"
@@ -68,6 +69,21 @@ enum GAME_STATE ready_loop () {
   return exit_state;
 }
 
+void time_run (WINDOW* gameboard_win, WINDOW* timerun_win) {
+  struct timespec start, end;
+  long ms;
+  //long sec;
+  clock_gettime(CLOCK_REALTIME, &start);
+
+  while(1) {
+    usleep(20000);
+    clock_gettime(CLOCK_REALTIME, &end);
+    ms = (end.tv_nsec - start.tv_nsec) / 1000000;
+    ms += (end.tv_sec - start.tv_sec) * 1000;
+    timerun_print(gameboard_win, timerun_win, ms);
+  }
+}
+
 int main () {
   srandom(time(NULL));
 
@@ -104,8 +120,9 @@ int main () {
     state = ready_loop(); // 应该控制游戏退出
     if (state == exit_state) {break;}
     message_tips_print (message_win, "Dash to the right-bottom corner.");
+    time_run(gameboard_win, timerun_win);
 
-    timerun_print(gameboard_win, timerun_win,123456);
+    //timerun_print(gameboard_win, timerun_win,123456);
     state = key_input_loop(table, &start_point, &end_point, gameboard_win);
 
     /* 结束 */

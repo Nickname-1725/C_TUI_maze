@@ -109,12 +109,12 @@ void coordinate_screen_move (WINDOW* win, Coordinate* coordinate) {
   wrefresh(win);
 }
 
-void timerun_print (WINDOW* win, WINDOW* tim_win, int time_ms) {
+void timerun_print (WINDOW* win, WINDOW* tim_win, long time_ms) {
   int y, x;
   getyx(win, x, y);
-  int cemi_sec = (time_ms % 1000) / 10 ;
-  int sec = (time_ms / 1000) % 60;
-  int min = (time_ms / 1000) / 60;
+  int cemi_sec = time_ms % 1000 / 10 ;
+  int min = time_ms / 1000 / 60;
+  int sec = time_ms / 1000 % 60;
   mvwprintw(tim_win, 0, 0, "time: %02d:%02d.%02d", min, sec, cemi_sec);
   wmove(win, y, x);
   wrefresh(tim_win);
