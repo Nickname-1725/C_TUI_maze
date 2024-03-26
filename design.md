@@ -26,17 +26,21 @@ main.c
 
 # 功能设计
 ## 计时功能
-1. 获取时间使用"time.h"库中的`clock_t clock()`函数
-   ```C
-   int main () {
-     clock_t start, end;
-     long time_ms; // 64位平台下, int 4byte, long 8byte.
-     start = clock();
-     // 做某些事情
-     end = clock();
-     time_ms = (end - start) * 1000 / CLOCKS_PER_SEC; 
-   }
-   ```
+1. 获取时间
+   1. "time.h"库中的`clock_t clock()`函数
+      ```C
+      int main () {
+        clock_t start, end;
+        long time_ms; // 64位平台下, int 4byte, long 8byte.
+        start = clock();
+        // 做某些事情
+        end = clock();
+        time_ms = (end - start) * 1000 / CLOCKS_PER_SEC; 
+      }
+      ```
+      问题: 不精确
+   2. "sys/time.h"库中的`gettimeofday`函数(过时)
+   3. 使用"time.h"库中的`clock_gettime`函数: 更好的精度和可移植性
 2. 使用"unistd.h"中的`int usleep(useconds_t usec)`函数, 参考[CSDN文章: Linux中的休眠函数](https://blog.csdn.net/q28292929/article/details/127665877)
 3. 使用"pthread.h"开一个线程, 使用`pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg)`跟`pthread_cancel(pthread_t thread)`函数
    ```C
