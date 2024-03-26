@@ -76,21 +76,16 @@ int main () {
     WINDOW *playground_win, *timerun_win, *message_win, *tips_win;
     init_gameboard (table, &gameboard_win, &playground_win, &timerun_win, &message_win, &tips_win);
 
-    char* str = maze_string (table);
-    waddstr (playground_win, str); 
-    free(str);
-
+    maze_render(table, playground_win);
     if (state != default_on_state) {
-      waddstr (message_win, "Press [any] key to start.");
+      message_tips_print (message_win, "Press [any] key to start.");
     } else {
-      waddstr (message_win, "You won, another game? ([any] key)");
+      message_tips_print (message_win, "You won, another game? ([any] key)");
     }
-    waddstr (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
+    message_tips_print (tips_win, "[q/Q] for quit.\n[p/P]: Comming soon.\n");
     timerun_print(gameboard_win, timerun_win, 0);
 
-    wrefresh(gameboard_win);
-    move(0, 0);
-    refresh();
+    cursor_reset();
 
     /* 开始互动 */
     int start_ch = getch();
@@ -98,8 +93,7 @@ int main () {
       state = exit_state;
       break;
     }
-    mvwaddstr (message_win, 0, 0, "Dash to the right-bottom corner.");
-    wrefresh(message_win);
+    message_tips_print (message_win, "Dash to the right-bottom corner.");
 
     timerun_print(gameboard_win, timerun_win,123456);
     state = key_input_loop(table, &start_point, &end_point, gameboard_win);

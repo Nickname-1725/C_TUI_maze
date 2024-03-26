@@ -37,6 +37,12 @@ char* maze_string (Table* table) {
   return str;
 }
 
+void maze_render (Table* table, WINDOW* playground_win) {
+    char* str = maze_string (table);
+    waddstr (playground_win, str); 
+    free(str);
+}
+
 void coordinate_screen_map (Coordinate* coordinate, int *y, int *x) {
   *y = coordinate->i;
   *x = coordinate->j*2 + 1;
@@ -113,6 +119,17 @@ void timerun_print (WINDOW* win, WINDOW* tim_win, int time_ms) {
   wmove(win, y, x);
   wrefresh(tim_win);
   wrefresh(win);
+}
+
+void message_tips_print (WINDOW* win, char* str) {
+  wclear (win); //先清空窗口文字
+  mvwaddstr (win, 0, 0, str);
+  wrefresh (win);
+}
+
+void cursor_reset () {
+  move(0, 0);
+  refresh();
 }
 
 void init_TUI () {
